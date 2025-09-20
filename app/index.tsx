@@ -9,7 +9,13 @@ import ThemeToggleButton from '../src/components/ThemeToggleButton';
 import { useTranslation } from 'react-i18next';
 import LenguageToggleButton from '../src/components/LenguageToggleButton';
 
+import * as WebBrowser from 'expo-web-browser';
+import { useGoogleLogin } from '../src/service/UseGoogleLogin';
+
+WebBrowser.maybeCompleteAuthSession();
+
 export default function LoginScreen() {
+  const { promptAsync, request } = useGoogleLogin();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [hiddenPassword, sethiddenPassword] = useState(true);
@@ -17,12 +23,11 @@ export default function LoginScreen() {
   const { t } = useTranslation();
   const router = useRouter();
 
+
   useEffect(() => {
     const checkUser = async () => {
       const user = await AsyncStorage.getItem('@user');
-      if (user) {
-        router.push('/HomeScreen');
-      }
+      if (user) router.push('/HomeScreen');
     };
     checkUser();
   }, []);
@@ -47,13 +52,13 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <View style={styles.innerContainer}>
-        <Text style={[styles.titulo, { color: colors.text }]}>{t("login")}</Text>
+        <Text style={[styles.titulo, { color: colors.text }]}>{t('login')}</Text>
 
-        {/* Campo Email */}
+        {/* Email */}
         <TextInput
           style={[styles.input, { backgroundColor: colors.textInputBackground, color: colors.textInputText }]}
           placeholder={t('email')}
@@ -64,7 +69,7 @@ export default function LoginScreen() {
           onChangeText={setEmail}
         />
 
-        {/* Campo Senha */}
+        {/* Senha */}
         <View style={[styles.input, { backgroundColor: colors.textInputBackground }]}>
           <TextInput
             style={[styles.textInput, { color: colors.textInputText }]}
@@ -74,17 +79,18 @@ export default function LoginScreen() {
             value={senha}
             onChangeText={setSenha}
           />
-          <Ionicons
-            onPress={showPassword}
-            name={hiddenPassword ? "eye-off" : "eye"}
-            size={22}
-            color={colors.icon || "#00B37E"}
-          />
+          <Ionicons onPress={showPassword} name={hiddenPassword ? 'eye-off' : 'eye'} size={22} color={colors.icon || '#00B37E'} />
         </View>
 
-        {/* Botão Login */}
+        {/* Login email/senha */}
         <TouchableOpacity style={[styles.botao, { backgroundColor: colors.button }]} onPress={handleLogin}>
           <Text style={[styles.textoBotao, { color: colors.buttonText }]}>{t('login')}</Text>
+        </TouchableOpacity>
+        {/* Login Google */}
+        <TouchableOpacity style={[styles.botao, { backgroundColor: colors.button, marginTop: 10 }]} disabled={!request} onPress={() => {
+          promptAsync();
+        }}>
+          <Text style={[styles.textoBotao, { color: colors.buttonText }]}>{t('loginWithGoogle')}</Text>
         </TouchableOpacity>
 
         {/* Links */}
@@ -109,64 +115,15 @@ export default function LoginScreen() {
   );
 }
 
-// Estilização
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 20,
-  },
-  innerContainer: {
-    padding: 20,
-  },
-  titulo: {
-    fontSize: 30,
-    fontWeight: "800",
-    marginBottom: 40,
-    textAlign: "center",
-  },
-  input: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 55,
-    marginBottom: 18,
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.1)",
-  },
-  textInput: {
-    flex: 1,
-    fontSize: 16,
-    paddingVertical: 10,
-  },
-  botao: {
-    paddingVertical: 15,
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 10,
-    shadowColor: "#00B37E",
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  textoBotao: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  link: {
-    marginTop: 18,
-    fontSize: 15,
-    textAlign: "center",
-    textDecorationLine: "underline",
-  },
-  toggleContainer: {
-    marginTop: 30,
-    alignItems: "center",
-  },
-  langContainer: {
-    flexDirection: "row",
-    marginTop: 10,
-    gap: 12,
-  },
+  container: { flex: 1, justifyContent: 'center', paddingHorizontal: 20 },
+  innerContainer: { padding: 20 },
+  titulo: { fontSize: 30, fontWeight: '800', marginBottom: 40, textAlign: 'center' },
+  input: { flexDirection: 'row', alignItems: 'center', borderRadius: 12, paddingHorizontal: 12, height: 55, marginBottom: 18, borderWidth: 1, borderColor: 'rgba(0,0,0,0.1)' },
+  textInput: { flex: 1, fontSize: 16, paddingVertical: 10 },
+  botao: { paddingVertical: 15, borderRadius: 12, alignItems: 'center', marginTop: 10, shadowColor: '#00B37E', shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 },
+  textoBotao: { fontSize: 18, fontWeight: 'bold' },
+  link: { marginTop: 18, fontSize: 15, textAlign: 'center', textDecorationLine: 'underline' },
+  toggleContainer: { marginTop: 30, alignItems: 'center' },
+  langContainer: { flexDirection: 'row', marginTop: 10, gap: 12 },
 });
