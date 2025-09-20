@@ -1,91 +1,78 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, deleteUser, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { auth } from "../config/FirebaseConfig";
-import { useRouter } from "expo-router";
-import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, deleteUser, updatePassword, EmailAuthProvider, reauthenticateWithCredential, signInWithCredential } from "firebase/auth";
+import { Alert } from "react-native";
+import { useRouter } from "expo-router";
 
-const router = useRouter()
+const router = useRouter();
 
+// Criação de usuário
 export const createUser = (email, password) => {
-    createUserWithEmailAndPassword(auth, email, password)
-          .then(async(userCredential) => {
-            const user = userCredential.user;
-            await AsyncStorage.setItem('@user', JSON.stringify(user));
-            router.push('/HomeScreen');
-          })
-          .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            Alert.alert(`Erro ${errorCode}`, `Erro ao cadastrar: ${errorMessage}`);
-          });
-}
-
-export const userLogin = (email, password) =>  {
-  signInWithEmailAndPassword(auth, email, password)
-    .then(async(userCredential) => {
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(async (userCredential) => {
       const user = userCredential.user;
-      await AsyncStorage.setItem("@user", JSON.stringify(user));
-      router.push("/HomeScreen");
+      await AsyncStorage.setItem('@user', JSON.stringify({ uid: user.uid, email: user.email }));
+      router.push('/HomeScreen');
     })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      Alert.alert(`Erro ${errorCode}`, `Erro ao cadastrar: ${errorMessage}`);
-    })
-}
+    .catch((error) => Alert.alert("Erro", error.message));
+};
 
+// Login com email/senha
+export const userLogin = (email, password) => {
+  signInWithEmailAndPassword(auth, email, password)
+    .then(async (userCredential) => {
+      const user = userCredential.user;
+      await AsyncStorage.setItem('@user', JSON.stringify({ uid: user.uid, email: user.email }));
+      router.push('/HomeScreen');
+    })
+    .catch((error) => Alert.alert("Erro", error.message));
+};
+
+
+// Reset de senha
 export const passwordReset = (email) => {
   sendPasswordResetEmail(auth, email)
-  .then(()=> {
-    alert("Enviado e-mail de recuperação")
-  })
-  .catch((error) => {
-    console.log("Erro ao enviar email ", error.message);
-    alert("Erro ao enviar email. Verifique se o email esta correto")
-  })
-}
+    .then(() => Alert.alert("Sucesso", "E-mail de recuperação enviado"))
+    .catch((error) => Alert.alert("Erro", error.message));
+};
 
-export const deleteAccount = async () => {
-  try{
-  const user = auth.currentUser;
-    user.delete();
-    if (user) {
-      await deleteUser(user);
-      await AsyncStorage.removeItem("@user");
-      router.push("/");
-    } else {
-      Alert.alert("Erro", "Usuário não encontrado");
-    }
-  } catch (error) {
-    console.log("Erro ao deletar conta ", error.message);
-    Alert.alert("Erro", "Erro ao deletar conta. Tente novamente mais tarde.");
-  }
-  
-}
-
+// Alterar senha
 export const changePassword = async (currentPassword, newPassword) => {
-  try{
+  try {
     const user = auth.currentUser;
-    if(user){
-      reAuthenticate(user, currentPassword)
-      updatePassword(user, newPassword).then(() => {
-      Alert.alert("Sucesso", "Senha alterada com sucesso");
-      router.push("/HomeScreen")
-    }).catch((error) => {
-      console.log("Erro ao alterar senha ", error.message);
-      Alert.alert("Erro", "Erro ao alterar senha. Tente novamente mais tarde.");
-    });
-    } else {
-      Alert.alert("Erro", "Usuário não encontrado");
-      return;
-    }
+    if (!user || !user.email) throw new Error("Usuário não encontrado");
+    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    await reauthenticateWithCredential(user, credential);
+    await updatePassword(user, newPassword);
+    Alert.alert("Sucesso", "Senha alterada com sucesso");
+    router.push("/HomeScreen");
   } catch (error) {
-      console.log("Erro ao alterar senha ", error.message);
-      Alert.alert("Erro", "Erro ao alterar senha. Tente novamente mais tarde.");
-    }
-}
+    Alert.alert("Erro", error.message);
+  }
+};
 
-export const reAuthenticate = async (user, currentPassword) => {
-  const credential = EmailAuthProvider.credential(user.email, currentPassword)
-  await reauthenticateWithCredential(user, credential)
-}
+// Deletar conta
+export const deleteAccount = async () => {
+  try {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Usuário não encontrado");
+    await deleteUser(user);
+    await AsyncStorage.removeItem("@user");
+    router.push("/");
+  } catch (error) {
+    Alert.alert("Erro", error.message);
+  }
+};
+
+// Login com Google
+export const googleLogin = async (idToken) => {
+  try {
+    const credential = GoogleAuthProvider.credential(idToken);
+    const userCredential = await signInWithCredential(auth, credential);
+    const user = userCredential.user;
+    await AsyncStorage.setItem("@user", JSON.stringify({ uid: user.uid, email: user.email, name: user.displayName }));
+    router.push("/HomeScreen");
+  } catch (error) {
+    Alert.alert("Erro", error.message);
+  }
+};
