@@ -105,7 +105,7 @@ export default function HomeScreen() {
           <CustomButton label={t("deleteAccount")} onPress={confirmDeleteAccount} color={colors.danger} />
           <CustomButton label={t("changePassword")} onPress={() => router.push("/ChangingPassword")} color={colors.primary} />
           <CustomButton label={t("addTask")} onPress={() => router.push("/AddTask")} color={colors.success} />
-          <CustomButton label='Ver Tempo' onPress={() => router.push("/FindApi")} color={colors.primary} />
+          <CustomButton label='Ver Frases' onPress={() => router.push("/FindApi")} color={colors.primary} />
         </View>
 
         <View style={styles.listContainer}>
