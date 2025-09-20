@@ -1,4 +1,6 @@
 {
+  "welcomeToTasks": "Bem-vindo às Tarefas",
+  "manageTasksQuickly": "Gerencie suas tarefas rapidamente",
   "welcome": "Bem-vindo ao app",
   "logout": "Sair",
   "deleteAccount": "Excluir Conta",
@@ -7,6 +9,7 @@
   "delete": "Excluir",
   "login": "Login",
   "signup": "Cadastrar",
+  "forgotPassword": "Esqueceu a senha?",
   "name": "Nome completo",
   "email": "E-mail",
   "password": "Senha",
@@ -20,6 +23,9 @@
   "addTask": "Adicionar Tarefa",
   "saveTask": "Salvar Tarefa",
   "selectDueDate": "Selecionar Data de Vencimento",
+  "selectDueTime": "Selecionar Horário de Vencimento",
+  "changeDate": "Alterar Data",
+  "changeTime": "Alterar Horário",
   "editTask": "Editar Tarefa",
   "changePassword": "Alterar Senha",
   "deleteTask": "Excluir Tarefa",
@@ -30,5 +36,7 @@
   "reminderNotificationTitle": "Lembrete de Tarefa",
   "reminderNotificationBody": "Você tem uma tarefa vencendo agora",
   "promotionNotificationTitle": "Promoção Especial!",
-  "promotionNotificationBody": "Aproveite nossa promoção exclusiva!"
+  "promotionNotificationBody": "Aproveite nossa promoção exclusiva!",
+  "error": "Erro",
+  "saveTaskError": "Não foi possível salvar a tarefa"
 }
