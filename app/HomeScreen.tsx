@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { deleteAccount } from "../src/service/LoginService";
 import Task, { TaskProps } from "../src/components/Task";
 import { useEffect, useState } from "react";
-import { getItems } from "../src/service/DatabaseService";
+import { getItems, updateItem, deleteItem } from "../src/service/DatabaseService";
 import { useTheme } from "../src/context/ThemeContext";
 import { useTranslation } from 'react-i18next';
 import * as Notifications from "expo-notifications";
@@ -30,7 +30,6 @@ Notifications.setNotificationHandler({
     shouldShowList: true,
   }),
 });
-
 
 export default function HomeScreen() {
   const [listaItems, setListaItems] = useState<TaskProps[]>([]);
@@ -60,7 +59,6 @@ export default function HomeScreen() {
     );
   };
 
-
   useEffect(() => {
     const findItems = async () => {
       try {
@@ -76,13 +74,37 @@ export default function HomeScreen() {
     findItems();
   }, []);
 
-
   useEffect(() => {
     async function requestPermissions() {
       await checkNotificationPermissions();
     }
     requestPermissions();
   }, []);
+
+  const handleToggleCompleted = async (id: string, completed: boolean) => {
+    try {
+      await updateItem(id, completed); // Atualiza no Firestore
+      // Atualiza localmente apenas o campo completed
+      setListaItems(prev =>
+        prev.map(task =>
+          task.id === id ? { ...task, completed, updatedAt: new Date() } : task
+        )
+      );
+    } catch (error) {
+      console.error("Erro ao atualizar tarefa:", error);
+      Alert.alert("Erro", "Não foi possível atualizar a tarefa");
+    }
+  };
+
+  const handleDeleteTask = async (id: string) => {
+    try {
+      await deleteItem(id); // Deleta no Firestore
+      setListaItems(prev => prev.filter(task => task.id !== id)); // Remove localmente
+    } catch (error) {
+      console.error("Erro ao deletar tarefa:", error);
+      Alert.alert("Erro", "Não foi possível deletar a tarefa");
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -116,13 +138,9 @@ export default function HomeScreen() {
               data={listaItems}
               renderItem={({ item }) => (
                 <Task
-                  title={item.title}
-                  description={item.description}
-                  dueDate={item.dueDate}
-                  completed={item.completed}
-                  id={item.id}
-                  createdAt={item.createdAt}
-                  updatedAt={item.updatedAt}
+                  {...item}
+                  onToggleCompleted={(completed) => handleToggleCompleted(item.id, completed)}
+                  onDelete={() => handleDeleteTask(item.id)}
                 />
               )}
               keyExtractor={(item) => item.id}
