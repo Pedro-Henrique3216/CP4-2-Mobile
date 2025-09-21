@@ -46,7 +46,7 @@ Aplicativo mobile desenvolvido em **React Native** com **Expo**, voltado para ge
 
 ```bash
 git clone https://github.com/Pedro-Henrique3216/CP4-2-Mobile
-cd CP4-PT2-MOBILE
+cd CP4-2-Mobile
 ```
 
 npm install
