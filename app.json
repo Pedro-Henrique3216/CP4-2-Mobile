@@ -32,8 +32,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.pedro.CP4PT2MOBILE",
-      "edgeToEdgeEnabled": true,
-      "useNextNotificationsApi": true
+      "edgeToEdgeEnabled": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
